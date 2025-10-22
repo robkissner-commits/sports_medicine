@@ -1,0 +1,5 @@
+injury_date,athlete_name,injury_type,body_part,severity,recovery_date,days_missed,description
+2023-09-15,John Smith,Hamstring Strain,Right Hamstring,moderate,2023-10-01,16,Grade 1 hamstring strain during sprint
+2023-11-20,John Smith,Ankle Sprain,Left Ankle,minor,2023-11-27,7,Minor ankle roll during practice
+2023-08-10,Sarah Johnson,ACL Tear,Left Knee,severe,2024-01-15,158,Complete ACL tear requiring surgery
+2023-12-05,Mike Williams,Concussion,Head,moderate,2023-12-19,14,Concussion from collision during game
