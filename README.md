@@ -2,6 +2,28 @@
 
 A comprehensive web application for coaches to analyze athlete training data, recovery treatments, and lifestyle factors to generate personalized injury prevention plans.
 
+## 🚀 Quick Start (One Click!)
+
+**The easiest way to get started:**
+
+1. **Install Prerequisites** (one time only):
+   - Python 3.9+ from https://python.org (check "Add to PATH")
+   - Node.js LTS from https://nodejs.org
+
+2. **Download** the project from GitHub
+
+3. **Double-click** `RUN_APP.bat`
+
+4. **Wait** 5-8 minutes on first run (installs dependencies automatically)
+
+5. **Done!** Browser opens automatically to http://127.0.0.1:3000
+
+**Subsequent runs take only 15-20 seconds!**
+
+See [ONE_CLICK_GUIDE.md](ONE_CLICK_GUIDE.md) for detailed instructions.
+
+---
+
 ## Features
 
 ### Data Management
@@ -37,6 +59,8 @@ A comprehensive web application for coaches to analyze athlete training data, re
   - Lifestyle factor improvements
 - Exportable prevention plans
 
+---
+
 ## Technology Stack
 
 ### Backend
@@ -52,6 +76,8 @@ A comprehensive web application for coaches to analyze athlete training data, re
 - **Recharts**: Interactive data visualizations
 - **Axios**: HTTP client
 - **React Router**: Navigation
+
+---
 
 ## Project Structure
 
@@ -78,67 +104,37 @@ sports_medicine/
 │   │       ├── TeamDashboard.jsx      # Team overview page
 │   │       ├── AthleteDetail.jsx      # Individual athlete page
 │   │       ├── AthleteManagement.jsx  # Athlete CRUD
-│   │       └── DataUpload.jsx         # File upload interface
+│   │       ├── DataUpload.jsx         # File upload interface
+│   │       └── ConnectionTest.jsx     # Diagnostics page
 │   ├── package.json
 │   └── vite.config.js
 ├── sample_data/             # Sample CSV files for testing
 ├── requirements.txt         # Python dependencies
-└── README.md               # This file
+├── RUN_APP.bat             # ⭐ ONE-CLICK LAUNCHER
+├── FIX_BACKEND.bat         # Fix backend dependencies
+├── FIX_FRONTEND.bat        # Fix frontend dependencies
+├── STOP_APP.bat            # Stop all servers
+├── TROUBLESHOOT.bat        # Network diagnostics
+├── README.md               # This file
+├── ONE_CLICK_GUIDE.md      # How to use RUN_APP.bat
+└── TROUBLESHOOTING_GUIDE.md # Comprehensive troubleshooting
 ```
 
-## Installation & Setup
+---
 
-### Prerequisites
-- Python 3.9+
-- Node.js 18+
-- npm or yarn
+## Launcher Scripts
 
-### Backend Setup
+| Script | Purpose | When to Use |
+|--------|---------|-------------|
+| **RUN_APP.bat** ⭐ | Main launcher - does everything automatically | **Use this!** Start the app |
+| FIX_BACKEND.bat | Reinstall Python dependencies | If backend has errors |
+| FIX_FRONTEND.bat | Reinstall Node.js dependencies | If frontend has errors |
+| STOP_APP.bat | Stop both servers | When done using the app |
+| TROUBLESHOOT.bat | Test network connections | If getting connection errors |
 
-1. Create and activate a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+**Recommendation:** Just use `RUN_APP.bat` for everything!
 
-2. Install Python dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-3. Create environment file (optional):
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-4. Initialize the database and start the server:
-```bash
-python run_backend.py
-```
-
-The API will be available at `http://localhost:8000`
-- API Documentation: `http://localhost:8000/docs`
-- Alternative docs: `http://localhost:8000/redoc`
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-```bash
-cd frontend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start the development server:
-```bash
-npm run dev
-```
-
-The application will be available at `http://localhost:3000`
+---
 
 ## Usage Guide
 
@@ -199,6 +195,13 @@ Go to "Upload Data" page:
 - Risk assessment history
 - Personalized recommendations
 
+**Connection Test Page**:
+- Navigate to "Connection Test" tab
+- See real-time diagnostics of backend/frontend connection
+- Troubleshoot network issues
+
+---
+
 ## Risk Calculation Methodology
 
 ### ACWR (Acute:Chronic Workload Ratio)
@@ -224,6 +227,8 @@ Weighted combination of:
 - Medium: Score ≥ 40
 - Low: Score < 40
 
+---
+
 ## Sample Data
 
 Sample CSV files are provided in `sample_data/`:
@@ -233,12 +238,14 @@ Sample CSV files are provided in `sample_data/`:
 - `sample_injuries.csv` - Injury history examples
 
 To test the system:
-1. Start both backend and frontend
+1. Start the app with `RUN_APP.bat`
 2. Go to "Manage Athletes" and create athletes from sample_athletes.csv
 3. Upload sample_training_loads.csv via "Upload Data"
 4. Upload sample_treatments.csv and sample_injuries.csv
 5. Click "Recalculate All Risks" on Team Dashboard
 6. Explore individual athlete profiles
+
+---
 
 ## API Endpoints
 
@@ -265,17 +272,62 @@ To test the system:
 - `POST /lifestyle/` - Create lifestyle log
 - `GET /lifestyle/athlete/{id}` - Get athlete lifestyle logs
 
-Full API documentation: `http://localhost:8000/docs`
+Full API documentation: `http://127.0.0.1:8000/docs`
 
-## Database Schema
+---
 
-### Tables
-- **athletes** - Athlete profiles
-- **training_loads** - Daily training metrics
-- **treatments** - Recovery treatments
-- **lifestyle_logs** - Daily lifestyle metrics
-- **risk_assessments** - Calculated risk scores
-- **injury_history** - Historical injuries
+## Troubleshooting
+
+### Application Won't Start
+
+**Check Prerequisites:**
+- Python 3.9+ installed: `python --version`
+- Node.js installed: `node --version`
+- Both should return version numbers
+
+**If "Module not found" errors:**
+1. Close all windows
+2. Run `FIX_BACKEND.bat`
+3. Run `FIX_FRONTEND.bat`
+4. Run `RUN_APP.bat` again
+
+**If "Port already in use":**
+1. Run `STOP_APP.bat`
+2. Wait 5 seconds
+3. Run `RUN_APP.bat` again
+
+### Network Errors
+
+**If seeing "Failed to load" errors:**
+1. Click "Connection Test" in navigation
+2. Check which tests fail (red X)
+3. See [TROUBLESHOOTING_GUIDE.md](TROUBLESHOOTING_GUIDE.md) for detailed help
+
+**Quick fix:**
+1. Close both terminal windows
+2. Run `STOP_APP.bat`
+3. Run `RUN_APP.bat` again
+
+### Common Issues
+
+**Backend shows "uvicorn not found":**
+- Run `FIX_BACKEND.bat`
+
+**Frontend shows "module not found":**
+- Run `FIX_FRONTEND.bat`
+
+**"Python is not recognized":**
+- Install Python from python.org
+- Check "Add to PATH" during installation
+- Restart computer
+
+**"npm is not recognized":**
+- Install Node.js from nodejs.org
+- Restart computer
+
+For comprehensive troubleshooting, see [TROUBLESHOOTING_GUIDE.md](TROUBLESHOOTING_GUIDE.md)
+
+---
 
 ## Configuration
 
@@ -284,9 +336,9 @@ Create a `.env` file with:
 
 ```env
 DATABASE_URL=sqlite:///./sports_medicine.db
-API_HOST=0.0.0.0
+API_HOST=127.0.0.1
 API_PORT=8000
-CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 ```
 
 For PostgreSQL:
@@ -294,35 +346,46 @@ For PostgreSQL:
 DATABASE_URL=postgresql://user:password@localhost:5432/sports_medicine
 ```
 
+---
+
 ## Development
 
-### Running Tests
-```bash
-# Backend tests (if implemented)
-pytest
+### Manual Start (Advanced)
 
-# Frontend tests
-cd frontend
-npm test
+If you prefer manual control:
+
+**Backend:**
+```bash
+cd /path/to/sports_medicine
+python -m venv venv
+venv\Scripts\activate  # Windows
+pip install -r requirements.txt
+python run_backend.py
+```
+
+**Frontend (new terminal):**
+```bash
+cd /path/to/sports_medicine/frontend
+npm install
+npm run dev
 ```
 
 ### Building for Production
 
-**Backend**:
+**Backend:**
 ```bash
-# Install production server
 pip install gunicorn
-
-# Run with gunicorn
 gunicorn backend.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 ```
 
-**Frontend**:
+**Frontend:**
 ```bash
 cd frontend
 npm run build
 # Serve the 'dist' folder with any static file server
 ```
+
+---
 
 ## Future Enhancements (Phase 2)
 
@@ -336,33 +399,30 @@ npm run build
 - [ ] User authentication and authorization
 - [ ] Mobile app
 
-## Troubleshooting
-
-**Backend won't start**:
-- Check if port 8000 is available
-- Verify all dependencies are installed: `pip install -r requirements.txt`
-- Check database permissions
-
-**Frontend won't start**:
-- Delete `node_modules` and run `npm install` again
-- Check if port 3000 is available
-- Verify backend is running
-
-**CSV upload fails**:
-- Check file format (CSV or Excel)
-- Verify column names match expected format
-- Ensure athlete exists if specifying athlete_id
-- Check backend logs for detailed error messages
-
-**No data showing**:
-- Ensure you've uploaded training data
-- Click "Recalculate All Risks" after uploading data
-- Check that athletes have at least 7 days of training data for ACWR
+---
 
 ## Support
 
-For issues, questions, or feature requests, please create an issue in the repository.
+Having issues? Check these resources:
+
+1. **[ONE_CLICK_GUIDE.md](ONE_CLICK_GUIDE.md)** - How to use RUN_APP.bat
+2. **[TROUBLESHOOTING_GUIDE.md](TROUBLESHOOTING_GUIDE.md)** - Comprehensive troubleshooting (10+ solutions)
+3. **Connection Test Page** - http://127.0.0.1:3000/test (real-time diagnostics)
+4. **API Docs** - http://127.0.0.1:8000/docs (interactive API documentation)
+
+---
 
 ## License
 
 This project is provided as-is for educational and professional use in sports medicine and athletic training.
+
+---
+
+## Summary
+
+**To get started in 3 steps:**
+1. Install Python and Node.js
+2. Double-click `RUN_APP.bat`
+3. Start analyzing athlete data!
+
+Everything else is automatic! 🚀
