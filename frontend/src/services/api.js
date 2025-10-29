@@ -45,6 +45,14 @@ export const getAthleteLifestyleLogs = (athleteId, startDate = null, endDate = n
   api.get(`/lifestyle/athlete/${athleteId}`, { params: { start_date: startDate, end_date: endDate } });
 
 // File Upload
+export const uploadAthletes = (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return api.post('/upload/athletes', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
 export const uploadTrainingLoads = (file, athleteId = null) => {
   const formData = new FormData();
   formData.append('file', file);

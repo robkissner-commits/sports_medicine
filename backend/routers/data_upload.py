@@ -11,6 +11,121 @@ from ..database import get_db
 router = APIRouter(prefix="/upload", tags=["data-upload"])
 
 
+@router.post("/athletes")
+async def upload_athletes(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """
+    Upload multiple athletes from CSV
+
+    Expected columns:
+    - name (required)
+    - position (optional)
+    - age (optional)
+    - email (optional)
+    - team (optional)
+    """
+    if not file.filename.endswith(('.csv', '.xlsx')):
+        raise HTTPException(
+            status_code=400,
+            detail="File must be CSV or Excel format"
+        )
+
+    try:
+        contents = await file.read()
+
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(io.BytesIO(contents))
+        else:
+            df = pd.read_excel(io.BytesIO(contents))
+
+        # Normalize column names
+        df.columns = df.columns.str.lower().str.strip()
+
+        # Check for required column
+        if 'name' not in df.columns:
+            raise HTTPException(
+                status_code=400,
+                detail="CSV must contain a 'name' column"
+            )
+
+        created_count = 0
+        updated_count = 0
+        skipped_count = 0
+        errors = []
+
+        for idx, row in df.iterrows():
+            try:
+                name = row['name']
+                if pd.isna(name) or not str(name).strip():
+                    errors.append(f"Row {idx + 1}: Name is required")
+                    skipped_count += 1
+                    continue
+
+                name = str(name).strip()
+
+                # Check if athlete already exists by name
+                existing_athlete = db.query(models.Athlete).filter(
+                    models.Athlete.name == name
+                ).first()
+
+                athlete_data = {'name': name}
+
+                # Add optional fields
+                if 'position' in row and pd.notna(row['position']):
+                    athlete_data['position'] = str(row['position']).strip()
+                if 'age' in row and pd.notna(row['age']):
+                    try:
+                        athlete_data['age'] = int(row['age'])
+                    except ValueError:
+                        errors.append(f"Row {idx + 1}: Invalid age value")
+                if 'email' in row and pd.notna(row['email']):
+                    email = str(row['email']).strip()
+                    # Check for duplicate email
+                    email_exists = db.query(models.Athlete).filter(
+                        models.Athlete.email == email
+                    ).first()
+                    if email_exists and (not existing_athlete or email_exists.id != existing_athlete.id):
+                        errors.append(f"Row {idx + 1}: Email {email} already exists")
+                        skipped_count += 1
+                        continue
+                    athlete_data['email'] = email
+                if 'team' in row and pd.notna(row['team']):
+                    athlete_data['team'] = str(row['team']).strip()
+
+                if existing_athlete:
+                    # Update existing athlete
+                    for key, value in athlete_data.items():
+                        setattr(existing_athlete, key, value)
+                    updated_count += 1
+                else:
+                    # Create new athlete
+                    db_athlete = models.Athlete(**athlete_data)
+                    db.add(db_athlete)
+                    created_count += 1
+
+            except Exception as e:
+                errors.append(f"Row {idx + 1}: {str(e)}")
+                skipped_count += 1
+
+        db.commit()
+
+        return {
+            "message": f"Successfully processed {created_count + updated_count} athletes",
+            "created_count": created_count,
+            "updated_count": updated_count,
+            "skipped_count": skipped_count,
+            "errors": errors[:10] if errors else []
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing file: {str(e)}"
+        )
+
+
 @router.post("/training-loads")
 async def upload_training_loads(
     file: UploadFile = File(...),
