@@ -148,7 +148,8 @@ function TeamDashboard() {
               {overview.athletes.map((athlete) => (
                 <tr
                   key={athlete.id}
-                  onClick={() => navigate(`/athlete/${athlete.id}`)}
+                  onClick={() => navigate(`/athlete/${athlete.id}/profile`)}
+                  style={{ cursor: 'pointer' }}
                 >
                   <td><strong>{athlete.name}</strong></td>
                   <td>{athlete.position || '-'}</td>

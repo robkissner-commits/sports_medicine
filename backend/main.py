@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from .config import settings
 from .database import init_db
-from .routers import athletes, data_upload, lifestyle, dashboard
+from .routers import athletes, data_upload, lifestyle, dashboard, training_loads, treatments, injuries
 
 
 @asynccontextmanager
@@ -41,6 +41,9 @@ app.include_router(athletes.router)
 app.include_router(data_upload.router)
 app.include_router(lifestyle.router)
 app.include_router(dashboard.router)
+app.include_router(training_loads.router)
+app.include_router(treatments.router)
+app.include_router(injuries.router)
 
 
 @app.get("/")
