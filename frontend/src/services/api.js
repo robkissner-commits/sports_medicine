@@ -43,6 +43,29 @@ export const getAthleteTrainingSummary = (athleteId, days = 28) =>
 export const createLifestyleLog = (data) => api.post('/lifestyle/', data);
 export const getAthleteLifestyleLogs = (athleteId, startDate = null, endDate = null) =>
   api.get(`/lifestyle/athlete/${athleteId}`, { params: { start_date: startDate, end_date: endDate } });
+export const getLifestyleLog = (id) => api.get(`/lifestyle/${id}`);
+export const updateLifestyleLog = (id, data) => api.put(`/lifestyle/${id}`, data);
+export const deleteLifestyleLog = (id) => api.delete(`/lifestyle/${id}`);
+
+// Training Loads (detailed CRUD)
+export const createTrainingLoad = (data) => api.post('/training-loads/', data);
+export const getTrainingLoad = (id) => api.get(`/training-loads/${id}`);
+export const updateTrainingLoad = (id, data) => api.put(`/training-loads/${id}`, data);
+export const deleteTrainingLoad = (id) => api.delete(`/training-loads/${id}`);
+
+// Treatments (detailed CRUD)
+export const getAthleteTreatments = (athleteId) => api.get(`/treatments/athlete/${athleteId}`);
+export const createTreatment = (data) => api.post('/treatments/', data);
+export const getTreatment = (id) => api.get(`/treatments/${id}`);
+export const updateTreatment = (id, data) => api.put(`/treatments/${id}`, data);
+export const deleteTreatment = (id) => api.delete(`/treatments/${id}`);
+
+// Injuries (detailed CRUD)
+export const getAthleteInjuries = (athleteId) => api.get(`/injuries/athlete/${athleteId}`);
+export const createInjury = (data) => api.post('/injuries/', data);
+export const getInjury = (id) => api.get(`/injuries/${id}`);
+export const updateInjury = (id, data) => api.put(`/injuries/${id}`, data);
+export const deleteInjury = (id) => api.delete(`/injuries/${id}`);
 
 // File Upload
 export const uploadAthletes = (file) => {
