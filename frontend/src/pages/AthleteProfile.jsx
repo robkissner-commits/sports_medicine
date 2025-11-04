@@ -412,10 +412,11 @@ const AthleteProfile = () => {
                   <thead>
                     <tr>
                       <th>Date</th>
-                      <th>Training Load</th>
-                      <th>Distance (m)</th>
-                      <th>High Speed (m)</th>
-                      <th>Sprint (m)</th>
+                      <th>Distance (mi)</th>
+                      <th>Accel Load</th>
+                      <th>Avg Speed (mph)</th>
+                      <th>Max Speed (mph)</th>
+                      <th>Calculated Load</th>
                       <th>Session Type</th>
                       <th>Actions</th>
                     </tr>
@@ -435,36 +436,48 @@ const AthleteProfile = () => {
                             <td>
                               <input
                                 type="number"
-                                value={editFormData.training_load}
-                                onChange={(e) => setEditFormData({ ...editFormData, training_load: parseFloat(e.target.value) })}
+                                step="0.1"
+                                value={editFormData.distance_miles || ''}
+                                onChange={(e) => setEditFormData({ ...editFormData, distance_miles: e.target.value ? parseFloat(e.target.value) : null })}
+                                placeholder="Miles"
                               />
                             </td>
                             <td>
                               <input
                                 type="number"
-                                value={editFormData.total_distance || ''}
-                                onChange={(e) => setEditFormData({ ...editFormData, total_distance: e.target.value ? parseFloat(e.target.value) : null })}
+                                step="0.1"
+                                value={editFormData.accumulated_accel_load || ''}
+                                onChange={(e) => setEditFormData({ ...editFormData, accumulated_accel_load: e.target.value ? parseFloat(e.target.value) : null })}
+                                placeholder="Accel Load"
                               />
                             </td>
                             <td>
                               <input
                                 type="number"
-                                value={editFormData.high_speed_distance || ''}
-                                onChange={(e) => setEditFormData({ ...editFormData, high_speed_distance: e.target.value ? parseFloat(e.target.value) : null })}
+                                step="0.1"
+                                value={editFormData.average_speed_mph || ''}
+                                onChange={(e) => setEditFormData({ ...editFormData, average_speed_mph: e.target.value ? parseFloat(e.target.value) : null })}
+                                placeholder="Avg mph"
                               />
                             </td>
                             <td>
                               <input
                                 type="number"
-                                value={editFormData.sprint_distance || ''}
-                                onChange={(e) => setEditFormData({ ...editFormData, sprint_distance: e.target.value ? parseFloat(e.target.value) : null })}
+                                step="0.1"
+                                value={editFormData.max_speed_mph || ''}
+                                onChange={(e) => setEditFormData({ ...editFormData, max_speed_mph: e.target.value ? parseFloat(e.target.value) : null })}
+                                placeholder="Max mph"
                               />
+                            </td>
+                            <td>
+                              <span style={{color: '#6c757d', fontStyle: 'italic'}}>Auto-calculated</span>
                             </td>
                             <td>
                               <input
                                 type="text"
                                 value={editFormData.session_type || ''}
                                 onChange={(e) => setEditFormData({ ...editFormData, session_type: e.target.value })}
+                                placeholder="Training"
                               />
                             </td>
                             <td>
@@ -475,10 +488,11 @@ const AthleteProfile = () => {
                         ) : (
                           <>
                             <td>{load.date}</td>
-                            <td>{load.training_load}</td>
-                            <td>{load.total_distance?.toFixed(0) || '-'}</td>
-                            <td>{load.high_speed_distance?.toFixed(0) || '-'}</td>
-                            <td>{load.sprint_distance?.toFixed(0) || '-'}</td>
+                            <td>{load.distance_miles?.toFixed(1) || '-'}</td>
+                            <td>{load.accumulated_accel_load?.toFixed(1) || '-'}</td>
+                            <td>{load.average_speed_mph?.toFixed(1) || '-'}</td>
+                            <td>{load.max_speed_mph?.toFixed(1) || '-'}</td>
+                            <td><strong>{load.training_load?.toFixed(0)}</strong></td>
                             <td>{load.session_type || '-'}</td>
                             <td>
                               <button onClick={() => handleEdit(load, 'trainingLoad')} className="btn-edit">Edit</button>
