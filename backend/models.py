@@ -31,22 +31,15 @@ class TrainingLoad(Base):
     athlete_id = Column(Integer, ForeignKey("athletes.id"), nullable=False)
     date = Column(Date, nullable=False, index=True)
 
-    # Kinexon metrics
-    total_distance = Column(Float)  # meters
-    high_speed_distance = Column(Float)  # meters
-    sprint_distance = Column(Float)  # meters
-    accelerations = Column(Integer)
-    decelerations = Column(Integer)
-    max_speed = Column(Float)  # km/h
+    # Kinexon metrics (user inputs these 4 fields)
+    distance_miles = Column(Float, nullable=False)  # Distance (mi)
+    accumulated_accel_load = Column(Float, nullable=False)  # Accumulated Acceleration Load
+    average_speed_mph = Column(Float)  # Speed (Ø) (mph)
+    max_speed_mph = Column(Float)  # Speed (max.) (mph)
 
-    # Training load metrics
-    training_load = Column(Float, nullable=False)  # RPE * duration or calculated load
-    duration = Column(Integer)  # minutes
-    session_type = Column(String)  # practice, game, recovery, etc.
-
-    # Additional metrics
-    player_load = Column(Float)  # Overall player load
-    metabolic_power = Column(Float)
+    # Calculated metrics
+    training_load = Column(Float, nullable=False)  # Auto-calculated from Kinexon data
+    session_type = Column(String)  # Optional: practice, game, recovery, etc.
 
     created_at = Column(DateTime, default=datetime.utcnow)
 

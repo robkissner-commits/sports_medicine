@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from backend.database import SessionLocal
 from backend import models
-from backend.analytics import AnalyticsEngine
+from backend.analytics import AnalyticsEngine, calculate_training_load_from_kinexon
 
 
 def clear_existing_data(db):
@@ -169,21 +169,46 @@ def generate_training_loads(db, athlete, scenario, days=56):
                 load = base_load + random.uniform(-50, 50)
             loads.append((day_date, load))
 
-    # Create training load records
-    for day_date, load in loads:
+    # Create training load records with Kinexon metrics
+    for day_date, target_load in loads:
+        # Work backwards from desired load to generate realistic Kinexon metrics
+        # Typical training session: 3-6 miles, significant acceleration load
+
+        # Distance: typically 3-6 miles for field sports
+        distance_miles = random.uniform(2.5, 6.5)
+
+        # Accumulated Acceleration Load: typically 50-200 for training
+        # Higher for intense sessions, lower for recovery
+        intensity_factor = target_load / 350  # Normalize around 350 baseline
+        accumulated_accel_load = max(30, min(250, 100 * intensity_factor + random.uniform(-20, 20)))
+
+        # Average speed: typically 3-5 mph for field sports training
+        average_speed_mph = random.uniform(3.0, 5.5)
+
+        # Max speed: typically 12-18 mph for sprints
+        max_speed_mph = random.uniform(12.0, 18.5)
+
+        # Calculate actual training load from Kinexon metrics
+        calculated_load = calculate_training_load_from_kinexon(
+            distance_miles=distance_miles,
+            accumulated_accel_load=accumulated_accel_load,
+            average_speed_mph=average_speed_mph,
+            max_speed_mph=max_speed_mph
+        )
+
         training_load = models.TrainingLoad(
             athlete_id=athlete.id,
             date=day_date,
-            training_load=load,
-            total_distance=load * 35,  # Approximate distance
-            high_speed_distance=load * 3,
-            sprint_distance=load * 0.5,
-            duration=90,
+            distance_miles=distance_miles,
+            accumulated_accel_load=accumulated_accel_load,
+            average_speed_mph=average_speed_mph,
+            max_speed_mph=max_speed_mph,
+            training_load=calculated_load,
             session_type="Training"
         )
         db.add(training_load)
 
-    print(f"  ✓ Generated {len(loads)} training sessions")
+    print(f"  ✓ Generated {len(loads)} training sessions with Kinexon metrics")
 
 
 def generate_lifestyle_data(db, athlete, scenario, days=14):
@@ -384,11 +409,6 @@ def calculate_risks(db, athletes):
             db.add(risk_assessment)
             db.commit()
 
-            # Update athlete with latest risk
-            athlete.risk_level = risk_data["risk_level"]
-            athlete.risk_score = risk_data["overall_risk_score"]
-            athlete.acwr = risk_data.get("acwr")
-
             print(f"  ✓ Risk Level: {risk_data['risk_level'].upper()}")
             print(f"  ✓ Risk Score: {risk_data['overall_risk_score']:.1f}")
             if risk_data.get("training_monotony"):
@@ -411,11 +431,16 @@ def print_summary(db, athletes):
     print(f"\nTotal Athletes: {len(athletes)}")
 
     for athlete, scenario in athletes:
+        # Get latest risk assessment
+        latest_risk = db.query(models.RiskAssessment).filter(
+            models.RiskAssessment.athlete_id == athlete.id
+        ).order_by(models.RiskAssessment.date.desc()).first()
+
         print(f"\n{athlete.name} ({scenario}):")
         print(f"  Age: {athlete.age}")
-        print(f"  Risk Level: {athlete.risk_level or 'Not Calculated'}")
-        print(f"  Risk Score: {athlete.risk_score or 'N/A'}")
-        print(f"  ACWR: {athlete.acwr:.2f if athlete.acwr else 'N/A'}")
+        print(f"  Risk Level: {latest_risk.risk_level.upper() if latest_risk else 'Not Calculated'}")
+        print(f"  Risk Score: {latest_risk.overall_risk_score:.1f if latest_risk else 'N/A'}")
+        print(f"  ACWR: {latest_risk.acwr:.2f if latest_risk and latest_risk.acwr else 'N/A'}")
 
         training_count = db.query(models.TrainingLoad).filter(
             models.TrainingLoad.athlete_id == athlete.id

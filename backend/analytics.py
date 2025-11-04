@@ -7,6 +7,52 @@ from sqlalchemy import and_
 from . import models
 
 
+def calculate_training_load_from_kinexon(
+    distance_miles: float,
+    accumulated_accel_load: float,
+    average_speed_mph: Optional[float] = None,
+    max_speed_mph: Optional[float] = None
+) -> float:
+    """
+    Calculate training load from Kinexon metrics
+
+    Formula balances:
+    - Distance (primary workload indicator)
+    - Acceleration load (intensity/explosive work)
+    - Average speed (overall intensity)
+    - Max speed (peak effort indicator)
+
+    Args:
+        distance_miles: Distance covered in miles
+        accumulated_accel_load: Total acceleration load
+        average_speed_mph: Average speed in mph (optional)
+        max_speed_mph: Maximum speed in mph (optional)
+
+    Returns:
+        Calculated training load value
+    """
+    # Base load from distance (160 points per mile)
+    # Example: 5 miles = 800 base load
+    base_load = distance_miles * 160
+
+    # Acceleration load component (1.5x multiplier)
+    # Reflects high-intensity accelerations and decelerations
+    accel_component = accumulated_accel_load * 1.5
+
+    # Average speed component (5x multiplier)
+    # Higher average speed = higher intensity
+    speed_component = (average_speed_mph * 5) if average_speed_mph else 0
+
+    # Max speed bonus (2x multiplier)
+    # Peak speed efforts add to load
+    max_speed_component = (max_speed_mph * 2) if max_speed_mph else 0
+
+    # Total training load
+    training_load = base_load + accel_component + speed_component + max_speed_component
+
+    return round(training_load, 2)
+
+
 class AnalyticsEngine:
     """
     Enhanced analytics engine with Hybrid Evidence-Based System

@@ -33,20 +33,14 @@ class Athlete(AthleteBase):
         from_attributes = True
 
 
-# Training Load Schemas
+# Training Load Schemas (Kinexon Data)
 class TrainingLoadBase(BaseModel):
     date: date
-    total_distance: Optional[float] = None
-    high_speed_distance: Optional[float] = None
-    sprint_distance: Optional[float] = None
-    accelerations: Optional[int] = None
-    decelerations: Optional[int] = None
-    max_speed: Optional[float] = None
-    training_load: float
-    duration: Optional[int] = None
-    session_type: Optional[str] = None
-    player_load: Optional[float] = None
-    metabolic_power: Optional[float] = None
+    distance_miles: float  # Distance (mi) - REQUIRED
+    accumulated_accel_load: float  # Accumulated Acceleration Load - REQUIRED
+    average_speed_mph: Optional[float] = None  # Speed (Ø) (mph)
+    max_speed_mph: Optional[float] = None  # Speed (max.) (mph)
+    session_type: Optional[str] = None  # Optional: practice, game, recovery
 
 
 class TrainingLoadCreate(TrainingLoadBase):
@@ -56,6 +50,7 @@ class TrainingLoadCreate(TrainingLoadBase):
 class TrainingLoad(TrainingLoadBase):
     id: int
     athlete_id: int
+    training_load: float  # Auto-calculated from Kinexon data
     created_at: datetime
 
     class Config:
