@@ -66,6 +66,7 @@ export const createInjury = (data) => api.post('/injuries/', data);
 export const getInjury = (id) => api.get(`/injuries/${id}`);
 export const updateInjury = (id, data) => api.put(`/injuries/${id}`, data);
 export const deleteInjury = (id) => api.delete(`/injuries/${id}`);
+export const getInjuryRecoveryPrediction = (id) => api.get(`/injuries/${id}/recovery-prediction`);
 
 // File Upload
 export const uploadAthletes = (file) => {

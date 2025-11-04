@@ -4,6 +4,7 @@ from typing import List
 
 from .. import models, schemas
 from ..database import get_db
+from ..analytics import RecoveryPredictor
 
 router = APIRouter(prefix="/injuries", tags=["injuries"])
 
@@ -71,3 +72,19 @@ def create_injury(injury: schemas.InjuryHistoryCreate, db: Session = Depends(get
     db.commit()
     db.refresh(db_injury)
     return db_injury
+
+
+@router.get("/{injury_id}/recovery-prediction")
+def predict_recovery_time(injury_id: int, db: Session = Depends(get_db)):
+    """
+    Predict recovery time for an injury using evidence-based algorithms
+
+    Returns estimated recovery timeline with min/typical/max days and expected return dates.
+    Uses Cox Proportional Hazards-inspired approach with modifiers for age, severity, and injury history.
+    """
+    prediction = RecoveryPredictor.predict_recovery_for_athlete_injury(db, injury_id)
+
+    if "error" in prediction:
+        raise HTTPException(status_code=404, detail=prediction["error"])
+
+    return prediction
