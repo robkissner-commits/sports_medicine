@@ -7,6 +7,7 @@ from datetime import datetime, date
 
 from .. import models, schemas
 from ..database import get_db
+from ..analytics import calculate_training_load_from_kinexon
 
 router = APIRouter(prefix="/upload", tags=["data-upload"])
 
@@ -135,20 +136,18 @@ async def upload_training_loads(
     """
     Upload Kinexon training load data from CSV
 
-    Expected columns:
-    - date or Date (YYYY-MM-DD)
+    Required Kinexon columns (exact names):
+    - Date or date (YYYY-MM-DD)
+    - Distance (mi) - REQUIRED
+    - Accumulated Acceleration Load - REQUIRED
+    - Speed (Ø) (mph) - Optional (average speed)
+    - Speed (max.) (mph) - Optional (max speed)
+
+    Optional columns:
     - athlete_id or athlete_name (if not provided in form)
-    - training_load or load
-    - total_distance
-    - high_speed_distance
-    - sprint_distance
-    - accelerations
-    - decelerations
-    - max_speed
-    - duration
-    - session_type
-    - player_load
-    - metabolic_power
+    - Session Type or session_type (practice, game, etc.)
+
+    Training load will be auto-calculated from the Kinexon metrics.
     """
     if not file.filename.endswith(('.csv', '.xlsx')):
         raise HTTPException(
@@ -202,36 +201,58 @@ async def upload_training_loads(
                     errors.append(f"Row {idx + 1}: Athlete ID {current_athlete_id} not found")
                     continue
 
-                # Extract training load value
-                training_load = None
-                if 'training_load' in row and pd.notna(row['training_load']):
-                    training_load = float(row['training_load'])
-                elif 'load' in row and pd.notna(row['load']):
-                    training_load = float(row['load'])
-                elif 'player_load' in row and pd.notna(row['player_load']):
-                    training_load = float(row['player_load'])
+                # Extract required Kinexon fields
+                # Check for "Distance (mi)" column
+                distance_miles = None
+                if 'distance (mi)' in row and pd.notna(row['distance (mi)']):
+                    distance_miles = float(row['distance (mi)'])
 
-                if training_load is None:
-                    errors.append(f"Row {idx + 1}: No training_load value found")
+                if distance_miles is None:
+                    errors.append(f"Row {idx + 1}: Missing required field 'Distance (mi)'")
                     continue
 
-                # Create training load record
+                # Check for "Accumulated Acceleration Load" column
+                accumulated_accel_load = None
+                if 'accumulated acceleration load' in row and pd.notna(row['accumulated acceleration load']):
+                    accumulated_accel_load = float(row['accumulated acceleration load'])
+
+                if accumulated_accel_load is None:
+                    errors.append(f"Row {idx + 1}: Missing required field 'Accumulated Acceleration Load'")
+                    continue
+
+                # Extract optional speed fields
+                average_speed_mph = None
+                if 'speed (ø) (mph)' in row and pd.notna(row['speed (ø) (mph)']):
+                    average_speed_mph = float(row['speed (ø) (mph)'])
+
+                max_speed_mph = None
+                if 'speed (max.) (mph)' in row and pd.notna(row['speed (max.) (mph)']):
+                    max_speed_mph = float(row['speed (max.) (mph)'])
+
+                # Calculate training load from Kinexon metrics
+                training_load = calculate_training_load_from_kinexon(
+                    distance_miles=distance_miles,
+                    accumulated_accel_load=accumulated_accel_load,
+                    average_speed_mph=average_speed_mph,
+                    max_speed_mph=max_speed_mph
+                )
+
+                # Create training load record with Kinexon fields
                 load_data = {
                     'athlete_id': current_athlete_id,
                     'date': row[date_col].date(),
+                    'distance_miles': distance_miles,
+                    'accumulated_accel_load': accumulated_accel_load,
+                    'average_speed_mph': average_speed_mph,
+                    'max_speed_mph': max_speed_mph,
                     'training_load': training_load,
                 }
 
-                # Add optional fields
-                optional_fields = [
-                    'total_distance', 'high_speed_distance', 'sprint_distance',
-                    'accelerations', 'decelerations', 'max_speed', 'duration',
-                    'session_type', 'player_load', 'metabolic_power'
-                ]
-
-                for field in optional_fields:
-                    if field in row and pd.notna(row[field]):
-                        load_data[field] = row[field]
+                # Add optional session type
+                if 'session_type' in row and pd.notna(row['session_type']):
+                    load_data['session_type'] = str(row['session_type'])
+                elif 'session type' in row and pd.notna(row['session type']):
+                    load_data['session_type'] = str(row['session type'])
 
                 db_load = models.TrainingLoad(**load_data)
                 db.add(db_load)
