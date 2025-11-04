@@ -22,7 +22,9 @@ import {
   getAthleteACWRTrend,
   getAthleteTrainingSummary,
   calculateAthleteRisk,
+  getInjuryRecoveryPrediction,
 } from '../services/api';
+import RiskBreakdown from '../components/RiskBreakdown';
 import '../styles/AthleteProfile.css';
 
 const AthleteProfile = () => {
@@ -41,6 +43,7 @@ const AthleteProfile = () => {
   const [error, setError] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
   const [editFormData, setEditFormData] = useState({});
+  const [recoveryPredictions, setRecoveryPredictions] = useState({});
 
   useEffect(() => {
     loadAthleteData();
@@ -170,6 +173,19 @@ const AthleteProfile = () => {
       loadAthleteData();
     } catch (err) {
       alert(`Failed to recalculate risk: ${err.message}`);
+    }
+  };
+
+  const handleViewRecoveryPrediction = async (injuryId) => {
+    try {
+      const response = await getInjuryRecoveryPrediction(injuryId);
+      setRecoveryPredictions(prev => ({
+        ...prev,
+        [injuryId]: response.data
+      }));
+    } catch (err) {
+      alert(`Failed to fetch recovery prediction: ${err.message}`);
+      console.error('Error fetching recovery prediction:', err);
     }
   };
 
@@ -378,14 +394,9 @@ const AthleteProfile = () => {
               </div>
             )}
 
-            {/* Latest Recommendations */}
-            {riskHistory.length > 0 && riskHistory[riskHistory.length - 1].recommendations && (
-              <div className="recommendations-container">
-                <h3>Latest Recommendations</h3>
-                <div className="recommendations-text">
-                  {riskHistory[riskHistory.length - 1].recommendations}
-                </div>
-              </div>
+            {/* Enhanced Risk Breakdown */}
+            {riskHistory.length > 0 && (
+              <RiskBreakdown riskData={riskHistory[riskHistory.length - 1]} />
             )}
           </div>
         )}
@@ -669,6 +680,9 @@ const AthleteProfile = () => {
                             <td>
                               <button onClick={() => handleEdit(injury, 'injury')} className="btn-edit">Edit</button>
                               <button onClick={() => handleDelete(injury.id, 'injury')} className="btn-delete">Delete</button>
+                              <button onClick={() => handleViewRecoveryPrediction(injury.id)} className="btn-info">
+                                {recoveryPredictions[injury.id] ? 'Refresh' : 'Predict Recovery'}
+                              </button>
                             </td>
                           </>
                         )}
@@ -676,6 +690,55 @@ const AthleteProfile = () => {
                     ))}
                   </tbody>
                 </table>
+
+                {/* Recovery Predictions */}
+                {Object.keys(recoveryPredictions).length > 0 && (
+                  <div className="recovery-predictions">
+                    <h3>Recovery Predictions (Evidence-Based)</h3>
+                    {injuries.filter(inj => recoveryPredictions[inj.id]).map((injury) => {
+                      const pred = recoveryPredictions[injury.id];
+                      return (
+                        <div key={injury.id} className="recovery-card">
+                          <h4>{injury.injury_type} - {injury.body_part}</h4>
+                          <div className="recovery-timeline">
+                            <div className="timeline-item">
+                              <span className="timeline-label">Best Case:</span>
+                              <span className="timeline-value">{pred.min_recovery_days} days</span>
+                              <span className="timeline-date">({new Date(pred.expected_return_date_min).toLocaleDateString()})</span>
+                            </div>
+                            <div className="timeline-item typical">
+                              <span className="timeline-label">Most Likely:</span>
+                              <span className="timeline-value">{pred.typical_recovery_days} days</span>
+                              <span className="timeline-date">({new Date(pred.expected_return_date_typical).toLocaleDateString()})</span>
+                            </div>
+                            <div className="timeline-item">
+                              <span className="timeline-label">Worst Case:</span>
+                              <span className="timeline-value">{pred.max_recovery_days} days</span>
+                              <span className="timeline-date">({new Date(pred.expected_return_date_max).toLocaleDateString()})</span>
+                            </div>
+                          </div>
+                          {pred.modifiers_applied && (
+                            <div className="recovery-modifiers">
+                              <h5>Factors Affecting Recovery:</h5>
+                              <div className="modifiers-list">
+                                {pred.modifiers_applied.age_factor > 1.0 && (
+                                  <span className="modifier-tag">Age: +{((pred.modifiers_applied.age_factor - 1) * 100).toFixed(0)}%</span>
+                                )}
+                                {pred.modifiers_applied.severity_factor > 1.0 && (
+                                  <span className="modifier-tag">Severity: +{((pred.modifiers_applied.severity_factor - 1) * 100).toFixed(0)}%</span>
+                                )}
+                                {pred.modifiers_applied.previous_injury_factor > 1.0 && (
+                                  <span className="modifier-tag">Previous Injury: +{((pred.modifiers_applied.previous_injury_factor - 1) * 100).toFixed(0)}%</span>
+                                )}
+                                <span className="modifier-tag total">Total Modifier: {pred.modifiers_applied.total_multiplier}×</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
