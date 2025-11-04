@@ -116,11 +116,29 @@ class RiskAssessmentBase(BaseModel):
     date: date
     overall_risk_score: float
     risk_level: str
+
+    # Traditional metrics
     acwr: Optional[float] = None
+    acute_load: Optional[float] = None
+    chronic_load: Optional[float] = None
     load_spike_score: Optional[float] = None
     recovery_score: Optional[float] = None
     lifestyle_score: Optional[float] = None
     injury_history_score: Optional[float] = None
+
+    # NEW: Enhanced metrics (Hybrid Evidence-Based System)
+    training_monotony: Optional[float] = None
+    training_strain: Optional[float] = None
+    current_z_score: Optional[float] = None
+    max_z_score_7d: Optional[float] = None
+
+    # NEW: Risk modifiers (for transparency)
+    sleep_modifier: Optional[float] = None
+    stress_modifier: Optional[float] = None
+    injury_recency_modifier: Optional[float] = None
+    age_modifier: Optional[float] = None
+    compound_multiplier: Optional[float] = None
+
     recommendations: Optional[str] = None
 
 

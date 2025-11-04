@@ -106,12 +106,27 @@ class RiskAssessment(Base):
     overall_risk_score = Column(Float, nullable=False)
     risk_level = Column(String, nullable=False)  # low, medium, high
 
-    # Contributing factors
+    # Traditional contributing factors
     acwr = Column(Float)
+    acute_load = Column(Float)
+    chronic_load = Column(Float)
     load_spike_score = Column(Float)
     recovery_score = Column(Float)
     lifestyle_score = Column(Float)
     injury_history_score = Column(Float)
+
+    # NEW: Enhanced metrics (Hybrid Evidence-Based System)
+    training_monotony = Column(Float)
+    training_strain = Column(Float)
+    current_z_score = Column(Float)
+    max_z_score_7d = Column(Float)
+
+    # NEW: Risk modifiers (for transparency)
+    sleep_modifier = Column(Float)
+    stress_modifier = Column(Float)
+    injury_recency_modifier = Column(Float)
+    age_modifier = Column(Float)
+    compound_multiplier = Column(Float)
 
     # Recommendations
     recommendations = Column(Text)
