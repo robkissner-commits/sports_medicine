@@ -748,6 +748,43 @@ const AthleteProfile = () => {
                               </div>
                             </div>
                           )}
+
+                          {pred.justification && (
+                            <div className="recovery-justification">
+                              <h5>Clinical Justification:</h5>
+                              <div className="justification-text">
+                                {pred.justification.split('\n').map((line, idx) => (
+                                  <p key={idx}>{line}</p>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {pred.research_links && pred.research_links.length > 0 && (
+                            <div className="research-links">
+                              <h5>Supporting Research:</h5>
+                              <div className="links-list">
+                                {pred.research_links.map((link, idx) => (
+                                  <div key={idx} className="research-link-item">
+                                    <strong>{link.title}</strong>
+                                    <p className="citation">{link.citation}</p>
+                                    <div className="link-actions">
+                                      {link.url && (
+                                        <a href={link.url} target="_blank" rel="noopener noreferrer" className="research-link-btn">
+                                          View Full Study
+                                        </a>
+                                      )}
+                                      {link.doi && (
+                                        <a href={`https://doi.org/${link.doi}`} target="_blank" rel="noopener noreferrer" className="research-link-btn doi">
+                                          DOI: {link.doi}
+                                        </a>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
